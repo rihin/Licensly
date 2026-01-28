@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>License Manager | Enterprise Dashboard</title>
+
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+    <!-- Bootstrap & FontAwesome -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+
+    <!-- App CSS -->
+    <link rel="stylesheet" href="/static/style.css?v=19">
+</head>
+
+<body>
+
+    <!-- SIDEBAR -->
+    <aside class="sidebar">
+        <div class="sidebar-logo">
+            <i class="fas fa-shield-halved"></i>
+            <span>Licensly</span>
+        </div>
+
+        <ul class="nav-menu">
+            <li class="nav-item">
+                <a href="#" class="nav-link active">
+                    <i class="fas fa-chart-line"></i>
+                    Dashboard
+                </a>
+            </li>
+            <li class="nav-item">
+                <a href="#requests-body" class="nav-link">
+                    <i class="fas fa-list-check"></i>
+                    Requests
+                </a>
+            </li>
+        </ul>
+
+        <div class="sidebar-footer">
+            <a href="#" onclick="logout()" class="nav-link">
+                <i class="fas fa-sign-out-alt"></i>
+                Logout
+            </a>
+        </div>
+    </aside>
+
+    <!-- MAIN AREA -->
+    <main class="main-area">
+
+        <!-- HEADER -->
+        <div class="header-top">
+            <div class="welcome-msg">
+                <h1>Dashboard Overview</h1>
+                <p>Welcome back, <span id="user-role"
+                        style="text-transform: capitalize; color: var(--primary); font-weight: 600;"></span> Team</p>
+            </div>
+            <div class="header-actions">
+                <!-- Placeholder for future notifications or profile -->
+            </div>
+        </div>
+
+        <!-- STATS GRID -->
+        <div class="stats-grid">
+            <div class="stat-card">
+                <span class="stat-label">Total Requests</span>
+                <span class="stat-value" id="stat-total">0</span>
+                <span class="stat-trend text-primary"><i class="fas fa-sync fa-spin"></i> Syncing...</span>
+            </div>
+            <div class="stat-card">
+                <span class="stat-label">Pending License</span>
+                <span class="stat-value" id="stat-pending">0</span>
+                <span class="stat-trend text-warning">Awaiting Action</span>
+            </div>
+            <div class="stat-card">
+                <span class="stat-label">Ready for Client</span>
+                <span class="stat-value" id="stat-ready">0</span>
+                <span class="stat-trend text-success">Verified</span>
+            </div>
+            <div class="stat-card">
+                <span class="stat-label">Completed</span>
+                <span class="stat-value" id="stat-completed">0</span>
+                <span class="stat-trend text-muted">Finalized</span>
+            </div>
+        </div>
+
+        <!-- SUPPORT: CREATE REQUEST (In a collapsible or neat container) -->
+        <div id="support-actions" class="card hidden">
+            <div class="card-title">
+                <i class="fas fa-plus-circle"></i> Create New License Request
+            </div>
+
+            <form id="createRequestForm" enctype="multipart/form-data">
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="form-group mb-4">
+                            <label>Server Instance Name</label>
+                            <input type="text" name="server_name" placeholder="e.g. Production Cluster A"
+                                class="form-control" required>
+                        </div>
+                        <div class="form-group mb-3">
+                            <label>Support Comments (Optional)</label>
+                            <textarea name="support_comment" rows="4" placeholder="Mention specific requirements..."
+                                class="form-control"></textarea>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="form-group mb-3">
+                            <label>License Verification Screenshot</label>
+                            <div id="paste-area" class="paste-area">
+                                <i class="fas fa-cloud-upload-alt fa-2x mb-2"></i>
+                                <p>Click to browse or Paste (Ctrl+V)</p>
+                                <img id="paste-preview" class="hidden" />
+                            </div>
+                            <input type="file" id="screenshot-input" name="screenshot" accept="image/*" hidden>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="text-end mt-2">
+                    <button type="submit" class="btn btn-primary px-5">
+                        <i class="fas fa-paper-plane me-2"></i> Submit Request
+                    </button>
+                </div>
+            </form>
+        </div>
+
+        <!-- REQUESTS TABLE -->
+        <div class="card">
+            <div class="card-title">
+                <i class="fas fa-table"></i> Recent Requests Pipeline
+            </div>
+
+            <div class="table-container">
+                <table class="table align-middle">
+                    <thead>
+                        <tr>
+                            <th>Status</th>
+                            <th>Server</th>
+                            <th>Created At</th>
+                            <th>Screenshot</th>
+                            <th>Notes</th>
+                            <th id="th-accounts" class="hidden">Billing (Accounts)</th>
+                            <th id="th-license" class="hidden">Governance (License)</th>
+                            <th id="th-finalize" class="hidden">Delivery</th>
+                        </tr>
+                    </thead>
+                    <tbody id="requests-body">
+                        <!-- Filled by app.js -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+    </main>
+
+    <!-- App JS -->
+    <script src="/static/app.js?v=18"></script>
+
+    <!-- Global Scripts -->
+    <script>
+        function logout() {
+            localStorage.removeItem('token');
+            localStorage.removeItem('role');
+            window.location.href = '/';
+        }
+    </script>
+
+    <!-- IMAGE PREVIEW MODAL -->
+    <div id="image-preview-modal" class="modal-overlay hidden" onclick="closePreview()">
+        <span class="modal-close-btn">&times;</span>
+        <img id="modal-img" class="modal-img-content" src="" onclick="event.stopPropagation()">
+    </div>
+
+</body>
+
+</html>

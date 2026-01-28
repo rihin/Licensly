@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login | Licensly Enterprise</title>
+    <!-- Fonts & Icons -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+
+    <link rel="stylesheet" href="/static/style.css?v=17">
+</head>
+
+<body>
+    <div class="auth-container">
+        <div class="card2">
+            <div class="auth-logo">
+                <i class="fas fa-shield-halved"></i>
+                <span>Licensly</span>
+            </div>
+
+            <h2 class="auth-title">Welcome Back</h2>
+            <p class="auth-subtitle">Please sign in to access your license dashboard</p>
+
+            <form id="loginForm">
+                <div class="form-group mb-4">
+                    <label for="username">Username</label>
+                    <div class="input-icon-wrapper">
+                        <i class="fas fa-user-circle"></i>
+                        <input type="text" id="username" name="username" required
+                            placeholder="support, accounts, or license">
+                    </div>
+                </div>
+                <div class="form-group mb-4">
+                    <label for="password">Password</label>
+                    <div class="input-icon-wrapper">
+                        <i class="fas fa-lock text-muted"></i>
+                        <input type="password" id="password" name="password" required placeholder="••••••••">
+                    </div>
+                </div>
+                <button type="submit" class="btn btn-primary w-100 py-3 mt-2">
+                    <i class="fas fa-right-to-bracket me-2"></i> Access Dashboard
+                </button>
+                <p id="error-msg"
+                    style="color: var(--danger); text-align: center; margin-top: 1.5rem; font-weight: 500; display: none;">
+                </p>
+            </form>
+        </div>
+    </div>
+    <script>
+        document.getElementById('loginForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const formData = new FormData(e.target);
+
+            try {
+                const response = await fetch('/auth/login', {
+                    method: 'POST',
+                    body: formData
+                });
+
+                if (response.ok) {
+                    const data = await response.json();
+                    localStorage.setItem('token', data.access_token);
+                    localStorage.setItem('role', data.role);
+                    window.location.href = '/dashboard';
+                } else {
+                    const errorData = await response.json();
+                    document.getElementById('error-msg').style.display = 'block';
+
+                    if (response.status === 403) {
+                        document.getElementById('error-msg').innerText = errorData.detail.message || 'Access Denied: IP not whitelisted';
+                    } else {
+                        document.getElementById('error-msg').innerText = 'Invalid credentials';
+                    }
+                }
+            } catch (err) {
+                console.error(err);
+            }
+        });
+    </script>
+</body>
+
+</html>
